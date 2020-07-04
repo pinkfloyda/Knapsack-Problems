@@ -41,15 +41,19 @@ public class Main {
     // To get a feel of the optimization, if there are 100 items to choose and capacity is 1,000,000
     // then 2^100 is 1267650600228229401496703205376 (31 digits), but 1,000,000 * 100 is only 100,000,000 (9 digits)
     // feel the difference!
-    private static int knapsackRecursion(int count, int capacity, int[] sizes, int[] values) {
-        int[][] memo = new int[capacity+1][count];
-        for (int i=0; i<capacity+1; i++) {
-            for (int j=0; j<count; j++) {
-                memo[i][j] = -1;
+    private static int knapsackRecursion(int count, int capacity, int[] sizes, int[] values, boolean useMemo) {
+        int[][] memo = null;
+
+        if (useMemo) {
+            memo = new int[capacity+1][count];
+            for (int i=0; i<capacity+1; i++) {
+                for (int j=0; j<count; j++) {
+                    memo[i][j] = -1;
+                }
             }
-        }
-        for (int i=0; i<count; i++) {
-            memo[0][i] = 0; // for ZERO capacity there is nothing we can put, so initlize to be 0
+            for (int i=0; i<count; i++) {
+                memo[0][i] = 0; // for ZERO capacity there is nothing we can put, so initlize to be 0
+            }
         }
          // Count from end to start, can also count from start to end, but not straight-forward when converting to DP solution
         return knapsackRecursion(capacity, sizes, values, count-1, memo);
