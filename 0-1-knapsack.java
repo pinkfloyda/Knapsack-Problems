@@ -1,6 +1,10 @@
 import java.util.*;
 import java.io.*;
 
+// 1) Brute-force using DFS + Memoization
+// 2) DP using 2D array + Optimization
+// 3) DP using 1D array + Optimization
+
 public class Main {
 
     public static void main(String[] args) throws Exception {
@@ -20,7 +24,7 @@ public class Main {
             values[i] = Integer.parseInt(s[1]);
         }
 
-        int output = knapsackDPRolling(count, capacity, sizes, values);
+        int output = knapsackDP(count, capacity, sizes, values, true);
         System.out.println(output);
     }
 
@@ -63,10 +67,7 @@ public class Main {
         // The value if don't pick ith item
         int ans1 = knapsackRecursion(capacity, sizes, values, i-1, memo);
         // The value if pick ith item
-        int ans2 = 0;
-        if (sizes[i] <= capacity) {
-            ans2 = values[i] + knapsackRecursion(capacity-sizes[i], sizes, values, i-1, memo);
-        }
+        int ans2 = sizes[i] <= capacity ? (values[i] + knapsackRecursion(capacity-sizes[i], sizes, values, i-1, memo)) : 0;
 
         int ans = Math.max(ans1, ans2);
 
@@ -83,29 +84,43 @@ public class Main {
     // The table is filled with order from left to right and top to bottom
     //
     // Actually the above table can come to mind directly or naturally (without thiking of sub-problem in recursive way).
-    // Each entry (i,j) of the table represents the maximum value of trying to put (first) j items into a knapsack with capacity i,
-    // which is a sub-problem, if say each entry is optimal, then entry(i,j) = max(entry(i,j-1), entry(i-size-of-j, j-1)+value-of-j)
+    // Each entry (i,j) of the table represents the maximum value of trying to put (first) i items into a knapsack with capacity j,
+    // which is a sub-problem, if say each entry is optimal, then entry(i,j) = max(entry(i-1,j), entry(i-1, j-c(i)) + w(i))
     // will also be optimal. Inducttively, it will lead to final optimal solution in entry(C,N).
     // Instead of DFS+Memoization way of thiking, this thought process is truely Dynamic Programming
-    private static int knapsackDP(int count, int capacity, int[] sizes, int[] values) {
+    //
+    // There is one optimization step, because we are only interested in the right-bottom corner of the table, that is dp[count][capacity]
+    // To compute dp[count][capacity], it only lookup dp[count-1][capacity] and dp[count-1][capacity-lastC], dp[count-1][0..capacity-lastC-1] will not be used
+    // Likewise to compute dp[count-1][capacity-lastC], it only lookup dp[count-2][capacity-lastC] and dp[count-2][capacity-lastC-2ndLastC] and
+    // dp[count-2][0..capacity-lastC-2ndLastC-1] won't be used. So for each row i, when update, we can start from capacity of C-sum(i..N)
+    // To visualize it, the table is updated in a some-what upper triangular fashion
+    private static int knapsackDP(int count, int capacity, int[] sizes, int[] values, boolean optimize) {
         // initialize all to be 0s, especially for dp[0][j] (knapsack with ZERO capacity) and dp[i][0] (ZERO items to choose from)
-        int[][] dp = new int[capacity+1][count+1];
-        for (int i=1; i<=capacity; i++) {
-            for (int j=1; j<=count; j++) {
+        int[][] dp = new int[count+1][capacity+1];
+        int remainingSum = 0;
+        if (optimize) {
+          for (int i=1; i<=count; i++) {
+              remainingSum += sizes[i-1];
+          }
+        }
+        for (int i=1; i<=count; i++) {
+            int startCapacity = 1;
+            if (optimize) {
+                remainingSum -= sizes[i-1];
+                startCapacity = capacity > remainingSum ? (capacity - remainingSum) : 1;
+            }
+            for (int j=startCapacity; j<=capacity; j++) {
                 // The below code is very like the recursive version, but recursive call replaced with
                 // dp array access. The memo of the recursive call is populated the same way as dp here
 
-                // Don't pick item j-1 into knapsack
-                int ans1 = dp[i][j-1];
-                // Pick item j-1 into knapsack
-                int ans2 = 0;
-                if (sizes[j-1] <= i) {
-                    ans2 = values[j-1] + dp[i-sizes[j-1]][j-1];
-                }
+                // Don't pick item i-1 into knapsack
+                int ans1 = dp[i-1][j];
+                // Pick item i-1 into knapsack
+                int ans2 = sizes[i-1] <= j ? (values[i-1] + dp[i-1][j-sizes[i-1]]) : 0;
                 dp[i][j] = Math.max(ans1, ans2);
             }
         }
-        return dp[capacity][count];
+        return dp[count][capacity];
     }
 
     // Observe above that for each count dp[0..i][j], it only gets accessed by j+1
@@ -117,18 +132,28 @@ public class Main {
     // if we go from left-to-right to update the array, smaller capacity's value will be overriten
     // to avoid that, we need to update the array from right-to-left, which will preserve the smaller capacity's value (of previous count)
     // Hard to explain more clear in text, just visualize how the table/array is getting updated
-    private static int knapsackDPRolling(int count, int capacity, int[] sizes, int[] values) {
+    //
+    // Similarly, the optimization is same as above
+    private static int knapsackDPRolling(int count, int capacity, int[] sizes, int[] values, boolean optimize) {
         // initialize all to be 0s, especially for dp[0] (capacity is ZERO)
         int[] dp = new int[capacity+1];
+        int remainingSum = 0;
+        if (optimize) {
+            for (int i=1; i<=count; i++) {
+                remainingSum += sizes[i-1];
+            }
+        }
         for (int i=1; i<=count; i++) {
-            for (int j=capacity; j>0; j--) {
+            int startCapacity = sizes[i-1]; // smaller capacity means guareent not pick item i-1, just leave it
+            if (optimize) {
+                remainingSum -= sizes[i-1];
+                startCapacity = Math.max(sizes[i-1], capacity-remainingSum);
+            }
+            for (int j=capacity; j>=startCapacity; j--) {
                 // Don't pick item i-1 into knapsack
                 int ans1 = dp[j];
                 // Pick item i-1 into knapsack
-                int ans2 = 0;
-                if (sizes[i-1] <= j) {
-                    ans2 = values[i-1] + dp[j-sizes[i-1]];
-                }
+                int ans2 = values[i-1] + dp[j-sizes[i-1]];
                 dp[j] = Math.max(ans1, ans2);
             }
         }
