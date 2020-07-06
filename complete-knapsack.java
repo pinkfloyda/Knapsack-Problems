@@ -14,6 +14,8 @@ One line of one integer, which is the final result: the possible max value
 // 1) Brute-force using DFS + Memoization
 // 2) DP using 2D array
 // 3) DP using 2D array, optimized by reducing to 01 knapsack with binary compaction
+// 4) DP using 2D array, optimized for O(N*C)
+// 5) DP using 1D array, optimized for O(N*C)
 
 public class Main {
 
