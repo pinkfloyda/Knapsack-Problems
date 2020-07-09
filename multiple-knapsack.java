@@ -12,7 +12,8 @@ One line of one integer, which is the final result: the possible max value
 */
 
 // 1) DP using 1D array
-// 2) DP using 1D array, optimized by reducing to 01 knapsack with binary division
+// 2) DP using 1D array, divide into Mi items
+// 3) DP using 1D array, optimized by reducing to 01 knapsack with binary division
 
 public class Main {
 
