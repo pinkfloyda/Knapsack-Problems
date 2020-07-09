@@ -28,7 +28,7 @@ public class Main {
         int[] vs = new int[N]; // value array for each item
 
         // Read size and value for each item
-        for(int i=0; i<N; i++) {
+        for (int i=0; i<N; i++) {
             s = in.readLine().split(" ");
             ss[i] = Integer.parseInt(s[0]);
             vs[i] = Integer.parseInt(s[1]);
