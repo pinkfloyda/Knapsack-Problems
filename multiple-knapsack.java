@@ -37,7 +37,7 @@ public class Main {
         }
 
         // Output result
-        System.out.println(knapsackDPBinaryDivideOptimize(N, C, ss, vs, qs));
+        System.out.println(knapsackDPSlidingWindow(N, C, ss, vs, qs));
     }
 
     // F(i,c) = max{F(i-1,c-k*ci)+k*vi, 0<=k<=Mi}
@@ -119,5 +119,78 @@ public class Main {
             }
         }
         return dp[C];
+    }
+
+    // Maintain a strictly decreasing deque with maximum size of m
+    // private static void dqAdd(Deque<Integer> dq, int[] dp, int m, int i) {
+    //     if (dq.size() > 0 && dq.size() == m) {
+    //         dq.removeFirst();
+    //     }
+    //     while(!dq.isEmpty() && dq.peekLast() <= dp[i]) {
+    //         dq.removeLast();
+    //     }
+    //     dq.addLast(i);
+    // }
+
+    // For the DP solution, F(i,c) = max{F(i-1,c-k*ci)+k*vi,0<=k<=mi}, if we expand it in reverse order and also does the same for F(i,c+ci) and F(i,c+2*ci)
+    // We can get the below results, which is aligned by same Fs, it is clearly to see that for each incremental of ci, it is a sliding window
+    //
+    // F(i,c) =      max{F(i-1,c-mi*ci)+mi*vi, F(i-1,c-(mi-1)*ci)+(mi-1)*vi, F(i-1,c-(mi-2)*ci)+(mi-2)*vi, ..., F(i-1,c-2ci)+2vi, F(i-1,c-ci)+vi,  F(i-1,c)                                   }
+    // F(i,c+ci) =   max{                      F(i-1,c-(mi-1)*ci)+mi*vi,     F(i-1,c-(mi-2)*ci)+(mi-1)*vi, ...,                   F(i-1,c-ci)+2vi, F(i-1,c)+vi,  F(i-1,c+ci)                  }
+    // F(i,c+2*ci) = max{                                                    F(i-1,c-(mi-2)*ci)+mi*vi, ...,                                        F(i-1,c)+2vi, F(i-1,c+ci)+vi, F(i-1,c+2*ci)}
+    //
+    // For a sliding window it is possible to get maximum F costing O(1), by using a strict decreasing monotonic-queue
+    // e.g. for F(i,c), the window is of values starting from F(i-1,c-mi*ci)+mi*vi to F(i-1,c)
+    // then for F(i,c+ci), F(i-1,c-mi*ci)+mi*vi should be popped out of tbe monotonic-queue and remaining values are of F(i-1,c-(mi-1)*ci)+(mi-1)*vi to F(i-1,c)
+    // But the window values are not same as F(i,c+ci)'s components, it is less than vi, but it does not matter for ith item, vi is a constant.
+    // So we need to add  F(i-1,c+ci)-vi into the front of window, extract the maximum value out of the window and then add back vi
+    // Same for F(i,c+2*ci), need to add F(i-1,c+2*ci)-2*vi into the front of window, and add back 2*vi to the maxiumum value
+    //
+    // It is even more clear to start with 0: F(i,0)
+    // F(i,0) = max{F(i-1,0)}
+    // F(i,ci) = max{F(i-1,0)+vi, F(i-1,ci)}
+    // F(i,2*ci) = max{F(i-1,0)+2*vi, F(i-1,ci)+vi, F(i-1,2*ci)}
+    // ...
+    // F(i,mi*ci)= max{F(i-1,0)+mi*vi,......F(i-1,mi*ci)}
+    // F(i,(mi+1)*ci) = max{F(i-1,ci)+(mi+1)*vi,....,F(i-1,(mi+1)*ci)} (where F(i-1,0) poped out and F(i-1,(mi+1)*ci) added in)
+    //
+    // But what happens to F(i,c+1) through F(i,c+ci-1), actually we can maintain ci monotonic-queues to track sliding windows of
+    // F(i,0),F(i,ci),....F(i,mi*ci)
+    // F(i,1),F(i,1+ci),....F(i,1+mi*ci)
+    // ....
+    // F(i,ci-1),F(i,ci-1+ci),....F(i,ci-1+mi*ci)
+    //
+    // Because for each item, each capacity c entered or exit from the corresponding monotonic-queue once, so complexity is O(N*C)
+    private static int knapsackDPSlidingWindow(int N, int C, int[] ss, int[] vs, int[] qs) {
+        int[][] dp = new int[N+1][C+1];
+        for (int i=1; i<=N; i++) {
+            int s = ss[i-1], v = vs[i-1], q = qs[i-1];
+            List<Deque<int[]>> dqs = new ArrayList<>();
+            List<Integer> ws = new ArrayList<>(); // window start index
+            List<Integer> we = new ArrayList<>(); // window end index
+            for (int j=0, k=0; j<=C; j++, k=(k+1)%s) {
+                if (k == dqs.size()) {
+                    dqs.add(new LinkedList<>());
+                    ws.add(j);
+                    we.add(j);
+                }
+                Deque<int[]> dq = dqs.get(k);
+                if ((we.get(k)-ws.get(k))/s == q) { // slide window already max out
+                    if (dq.size() > 0 && dq.peekFirst()[0] == ws.get(k)) { // if window start already the max, will eject it
+                        dq.removeFirst();
+                    }
+                    ws.set(k, ws.get(k)+s); // increment the window start
+                }
+                int m = (j-k)/s;
+                // try to add the current index
+                while (!dq.isEmpty() && dq.peekLast()[1] <= dp[i-1][j]-m*v) {
+                    dq.removeLast();
+                }
+                dq.addLast(new int[]{j, dp[i-1][j]-m*v});
+                we.set(k, j);
+                dp[i][j] = dq.peekFirst()[1]+m*v;
+            }
+        }
+        return dp[N][C];
     }
 }
