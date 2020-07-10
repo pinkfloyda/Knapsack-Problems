@@ -121,17 +121,6 @@ public class Main {
         return dp[C];
     }
 
-    // Maintain a strictly decreasing deque with maximum size of m
-    // private static void dqAdd(Deque<Integer> dq, int[] dp, int m, int i) {
-    //     if (dq.size() > 0 && dq.size() == m) {
-    //         dq.removeFirst();
-    //     }
-    //     while(!dq.isEmpty() && dq.peekLast() <= dp[i]) {
-    //         dq.removeLast();
-    //     }
-    //     dq.addLast(i);
-    // }
-
     // For the DP solution, F(i,c) = max{F(i-1,c-k*ci)+k*vi,0<=k<=mi}, if we expand it in reverse order and also does the same for F(i,c+ci) and F(i,c+2*ci)
     // We can get the below results, which is aligned by same Fs, it is clearly to see that for each incremental of ci, it is a sliding window
     //
@@ -192,5 +181,36 @@ public class Main {
             }
         }
         return dp[N][C];
+    }
+
+    // Just use one monotonic-queue and loop for each slice and also use 1D array, because previous values are all stored in the monotonic-queue
+    private static int knapsackDPSlidingWindowOptimized(int N, int C, int[] ss, int[] vs, int[] qs) {
+        int[] dp = new int[C+1];
+        Deque<int[]> dq = new LinkedList<>();
+        int ws = 0; // window start index
+        int we = 0; // window end index
+        for (int i=0; i<N; i++) {
+            int s = ss[i], v = vs[i], q = qs[i];
+            for (int k=0; k<s; k++) { // loop s slices
+                dq.clear();
+                ws = we = k;
+                for (int j=k; j<=C; j+=s) { // increment each slice by s
+                    if ((we-ws)/s == q) { // slide window already max out
+                        if (dq.size() > 0 && dq.peekFirst()[0] == ws) { // if window start already the max, will eject it
+                            dq.removeFirst();
+                        }
+                        ws+=s;
+                    }
+                    int m = (j-k)/s; // multiplier
+                    while (!dq.isEmpty() && dq.peekLast()[1] <= dp[j]-m*v) { // try to add the current index
+                        dq.removeLast();
+                    }
+                    dq.addLast(new int[]{j, dp[j]-m*v});
+                    we=j;
+                    dp[j] = dq.peekFirst()[1]+m*v;
+                }
+            }
+        }
+        return dp[C];
     }
 }
