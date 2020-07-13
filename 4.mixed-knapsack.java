@@ -11,8 +11,6 @@ Output format:
 One line of one integer, which is the final result: the possible max value
 */
 
-// 1) DP using 1D array
-
 public class Main {
 
     public static void main(String[] args) throws Exception {
@@ -26,7 +24,7 @@ public class Main {
         int[] vs = new int[N]; // value array for each item
         int[] qs = new int[N]; // quantity array for each item
 
-        // Read size and value for each item
+        // Read size, value and quantity for each item
         for (int i=0; i<N; i++) {
             s = in.readLine().split(" ");
             ss[i] = Integer.parseInt(s[0]);

@@ -14,6 +14,8 @@ One line of one integer, which is the final result: the possible max value
 // 1) DP using 1D array
 // 2) DP using 1D array, divide into Mi items
 // 3) DP using 1D array, optimized by reducing to 01 knapsack with binary division
+// 4) DP using 2D array, optimized by using mono-queue
+// 5) DP using 1D array, optimized by using mono-queue
 
 public class Main {
 
@@ -28,7 +30,7 @@ public class Main {
         int[] vs = new int[N]; // value array for each item
         int[] qs = new int[N]; // quantity array for each item
 
-        // Read size and value for each item
+        // Read size, value and quantity for each item
         for (int i=0; i<N; i++) {
             s = in.readLine().split(" ");
             ss[i] = Integer.parseInt(s[0]);
