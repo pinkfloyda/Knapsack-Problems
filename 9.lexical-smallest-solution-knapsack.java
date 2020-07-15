@@ -33,7 +33,7 @@ public class Main {
 
         // Output result
         StringBuilder sb = new StringBuilder();
-        for (int i : knapsackDPSolution(N, C, ss, vs)) {
+        for (int i : knapsackDPSolution2(N, C, ss, vs)) {
             sb.append(i).append(" ");
         }
         System.out.println(sb.toString());
@@ -69,6 +69,31 @@ public class Main {
             if (g[i][c] == 1) {
                 ans.add(N-i+1);
                 c -= ss[N-i];
+            }
+        }
+
+        return ans;
+    }
+
+    // Don't need to mantain 2D to track picking/not-picking status
+    private static List<Integer> knapsackDPSolution2(int N, int C, int[] ss, int[] vs) {
+        int[][] dp = new int[N+1][C+1];
+
+        for (int i=1; i<=N; i++) {
+            for (int j=1; j<=C; j++) {
+                dp[i][j] = Math.max(dp[i-1][j], j>=ss[N-i] ? (dp[i-1][j-ss[N-i]] + vs[N-i]) : 0);
+            }
+        }
+
+        List<Integer> ans = new ArrayList<>();
+
+        // Try to trace back to get selections
+        int c = C;
+        for (int i=N; i>=1; i--) {
+            int k = N-i;
+            if (c >= ss[k] && dp[i-1][c-ss[k]]+vs[k] >= dp[i-1][c]) {
+                ans.add(k+1);
+                c -= ss[k];
             }
         }
 
