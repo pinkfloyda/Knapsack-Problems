@@ -2,7 +2,7 @@
  *
  * Got N items and a knapsack with volumn V, each item has volumn v[i] and weight w[i],
  * each item can only be picked once, return the max total item weight by putting items into 
- * knapsack without execceding its volumn.
+ * knapsack without exceeding its volumn.
  * 
  * Input:
  * First line has two integers: N and V, seperated by space
