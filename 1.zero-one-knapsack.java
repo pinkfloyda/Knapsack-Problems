@@ -93,7 +93,7 @@ public class Main {
      * To compute dp[N-1][V-v[N-1]], only dp[N-2][V-v[N-1]-v[N-2]] and dp[N-2][V-v[N-1]] will be used
      * 
      * So for each row i, when update, we only need to calculate starting from V-Σv[i..N]
-     * To visualize it, the table is updated in a some-what upper triangular fashion
+     * Visually, the table is updated in a somewhat right-upper triangular fashion
      */
     static int knapsackOptimize() {
         int[][] dp = new int[N+1][V+1];
