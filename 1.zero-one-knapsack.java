@@ -1,7 +1,7 @@
 /* 01-Knapsack Problem
  *
  * Got N items and a knapsack with volumn V, each item has volumn v[i] and weight w[i],
- * each item can only be picked once, return the max total item weight by putting items into 
+ * each item can only be picked once, what's the max total weight by putting items into 
  * knapsack without exceeding its volumn.
  * 
  * Input:
@@ -97,12 +97,10 @@ public class Main {
      */
     static int knapsackOptimize() {
         int[][] dp = new int[N+1][V+1];
-        
         int sum = 0;
         for (int i=1; i<=N; i++) {
             sum += v[i-1];
         }
-        
         for(int i=1; i<=N; i++) {
             sum -= v[i-1];
             for(int j=Math.max(V-sum, 1); j<=V; j++) {
@@ -117,16 +115,35 @@ public class Main {
      */
     static int knapsack1DOptimize() {
         int[] dp = new int[V+1];
-        
         int sum = 0;
         for (int i=1; i<=N; i++) {
             sum += v[i-1];
         }
-        
         for (int i=1; i<=N; i++) {
             sum -= v[i-1];
             for (int j=V; j>=Math.max(V-sum, v[i-1]); j--) {
                 dp[j] = Math.max(dp[j], dp[j-v[i-1]]+w[i-1]);
+            }
+        }
+        return dp[V];
+    }
+    
+    /* 5) Standard DP using rolling 1D array but happen to make knapsack full
+     *
+     * If question asks what is max total weight by putting item to make knapsack full; return -1 if not possible
+     * Similar solution like above but initially dp[0] should be 0 and dp[1..V] should all be -1. It means initially for zero items
+     * we can only make knapsack of 0 volumn full, not possible for other non-zero volumns.
+     * When update dp using 1D rolling array: dp[j] = max(dp[j], dp[j-v[i]]+w[i]), we need to check if previous value is -1 or not, if -1
+     * we cannot make knapsack full.
+     */
+    static int knapsackFull() {
+        int[] dp = new int[V+1];
+        for(int i=1; i<=V; i++) {
+            dp[i] = -1;
+        }
+        for (int i=1; i<=N; i++) {
+            for (int j=V; j>=v[i-1]; j--) {
+                dp[j] = Math.max(dp[j]<0 ? -1 : dp[j], dp[j-v[i-1]]<0 ? -1 : dp[j-v[i-1]]+w[i-1]);
             }
         }
         return dp[V];
