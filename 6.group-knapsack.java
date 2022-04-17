@@ -60,11 +60,14 @@ public class Main {
      *
      * dp[i][j] = max{ dp[i-1][j], dp[i-1][j-v[i][k]]+w[i][k], k is each group's item index }
      * But when implement using 2D array, dp[i-1][j] needs to move out to 2nd loop instead of in most inner loop
-     * e.g. the answer should be max { a, b, c, d }, if we move into most inner loop, answser will be max { a, d } only
-     * which is wrong; we need to compute it as max { max { max { a b }, c }, d }}}
+     * e.g. the answer should be max { a, b, c }, if we move into most inner loop, answser will be max { a, c } only
+     * which is wrong; we need to compute it as max { max { a b }, c }
      *
      * Sounds conter-intuitive, why it is different from 01 knapsack? Well in 01 knapsack we just need to compute
-     * max { a, b }. Actually this tricky case will happens for any problem with max { a, b, ... }
+     * max { a, b }. Actually this tricky case will happens for any problem with max of more than 2 items, just be careful
+     *
+     * Rolling 1D array will not have such problem because in a rolling array, dp[j] automatically inherit the previous value,
+     * no need explicit copy like 2D array.
      */
     static int knapsack() {
         int[][] dp = new int[N+1][V+1];
