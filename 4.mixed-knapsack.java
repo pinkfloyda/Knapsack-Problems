@@ -1,67 +1,87 @@
+/* Mixed-Knapsack Problem
+ *
+ * Given a knapsack with volumn V and N items where each item has volumn v[i], weight w[i]
+ * and can be either picked once, unlimited or with quantity n[i], what's the max total weight 
+ * by putting items into knapsack without exceeding its volumn.
+ * 
+ * Input:
+ * First line has two integers: N and V, seperated by space
+ * Each of next N lines has three integers: item's volumn, weight and quantity, sperated by space
+ *   quantity == -1 means this item can be picked once
+ *   quantity == 0 means this item can be picked unlimited
+ *   quantity > 0 means this item can be picked with quantity
+ * 
+ * Output:
+ * One line with one integer: max total item weight
+ *
+ * Sample Input:
+ *   4 5
+ *   1 2 -1
+ *   2 4 1
+ *   3 4 0
+ *   4 5 2
+ * Sample Output:
+ *   8
+ */
+
 import java.util.*;
-import java.io.*;
-
-/*
-Input format:
-
-First line is two integers N and C, representing unique item count and knapsack capacity, seperated by space
-Following N lines where each line is three integers si, vi and qi, representing ith item's size, value and quantity (-1 means 01, 0 means unbounded)
-
-Output format:
-One line of one integer, which is the final result: the possible max value
-*/
 
 public class Main {
+    
+    static int N;
+    static int V;
+    static int[] v;
+    static int[] w;
+    static int[] n;
 
-    public static void main(String[] args) throws Exception {
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
 
-        // Read N and C
-        String[] s = in.readLine().split(" ");
-        int N = Integer.parseInt(s[0]); // unique item count
-        int C = Integer.parseInt(s[1]); // knapsack capacity
-        int[] ss = new int[N]; // size array for each item
-        int[] vs = new int[N]; // value array for each item
-        int[] qs = new int[N]; // quantity array for each item
+        N = sc.nextInt();
+        V = sc.nextInt();
+        v = new int[N];
+        w = new int[N];
+        n = new int[N];
 
-        // Read size, value and quantity for each item
-        for (int i=0; i<N; i++) {
-            s = in.readLine().split(" ");
-            ss[i] = Integer.parseInt(s[0]);
-            vs[i] = Integer.parseInt(s[1]);
-            qs[i] = Integer.parseInt(s[2]);
+        for(int i=0; i<N; i++) {
+            v[i] = sc.nextInt();
+            w[i] = sc.nextInt();
+            n[i] = sc.nextInt();
         }
-
-        // Output result
-        System.out.println(knapsackDP(N, C, ss, vs, qs));
+        
+        int res = knapsack();
+        
+        System.out.println(res);
     }
-
-    // Just combine 01/complete/multiple knapsack algorithms
-    private static int knapsackDP(int N, int C, int[] ss, int[] vs, int[] qs) {
-        int[] dp = new int[C+1];
-        for (int i=0; i<N; i++) {
-            if (qs[i] < 0) { // solve by using 01 knapsack algorithm
-                for (int j=C; j>=ss[i]; j--) {
-                    dp[j] = Math.max(dp[j], dp[j-ss[i]]+vs[i]);
+ 
+    /* 1) Standard DP
+     *
+     * dp[i][j] = max{ dp[i-1][j-k*v[i]]+k*w[i], 0<=k<=n[i] && k*v[i]<=j }
+     */
+    static int knapsack() {
+        int[] dp = new int[V+1];
+        for (int i=1; i<=N; i++) {
+            if(n[i-1] < 0) { // using 01 knapsack solution
+                for (int j=V; j>=v[i-1]; j--) {
+                    dp[j] = Math.max(dp[j], dp[j-v[i-1]]+w[i-1]);
                 }
-            } else if (qs[i] == 0) { // solve by using complete knapsack algorithm
-                for (int j=ss[i]; j<=C; j++) {
-                    dp[j] = Math.max(dp[j], dp[j-ss[i]]+vs[i]);
+            } else if(n[i-1] == 0) { // using unbounded knapsack solution
+                for (int j=v[i-1]; j<=V; j++) {
+                    dp[j] = Math.max(dp[j], dp[j-v[i-1]]+w[i-1]);
                 }
-            } else { // solve by using multiple knapsack algorithm
-                int m = qs[i];
-                for (int s=ss[i], v=vs[i], k=1; m-k>0; s*=2, v*=2, k*=2) {
-                    for (int j=C; j>=s; j--) {
-                        dp[j] = Math.max(dp[j], dp[j-s]+v);
+            } else { // using bounded knapsack solution
+                int m = n[i-1];
+                for(int k=1, v2=v[i-1], w2=w[i-1]; m-k>0; v2*=2, w2*=2, k*=2) {
+                    for(int j=V; j>=v2; j--) {
+                        dp[j] = Math.max(dp[j], dp[j-v2]+w2);
                     }
-                    m -= k;
+                    m -= k; 
                 }
-                for (int j=C; j>=m*ss[i]; j--) {
-                    dp[j] = Math.max(dp[j], dp[j-m*ss[i]]+m*vs[i]);
+                for(int j=V, v2=m*v[i-1], w2=m*w[i-1]; j>=v2; j--) {
+                    dp[j] = Math.max(dp[j], dp[j-v2]+w2);
                 }
             }
         }
-        return dp[C];
+        return dp[V];
     }
-
 }
