@@ -85,14 +85,14 @@ public class Main {
     static int knapsackBinary() {
         int[] dp = new int[V+1];
         for(int i=1; i<=N; i++) {
-            int k = 2;
-            for(int v2=v[i-1], w2=w[i-1]; k-1<n[i-1]; v2*=2, w2*=2, k*=2) {
+            int m = n[i-1];
+            for(int k=1, v2=v[i-1], w2=w[i-1]; m-k>0; v2*=2, w2*=2, k*=2) {
                 for(int j=V; j>=v2; j--) {
                     dp[j] = Math.max(dp[j], dp[j-v2]+w2);
                 }
+                m -= k; 
             }
-            k = n[i-1] - k/2 + 1;
-            for(int j=V, v2=k*v[i-1], w2=k*w[i-1]; j>=v2; j--) {
+            for(int j=V, v2=m*v[i-1], w2=m*w[i-1]; j>=v2; j--) {
                 dp[j] = Math.max(dp[j], dp[j-v2]+w2);
             }
         }
