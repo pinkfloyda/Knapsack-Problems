@@ -1,6 +1,6 @@
 /* Unbounded-Knapsack Problem
  *
- * Got N items and a knapsack with volumn V, each item has volumn v[i] and weight w[i],
+ * Given a knapsack with volumn V and N items where each item has volumn v[i] and weight w[i],
  * each item can be picked unlimited times, what's the max total weight by putting items into 
  * knapsack without exceeding its volumn.
  * 
