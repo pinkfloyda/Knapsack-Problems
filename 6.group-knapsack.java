@@ -60,7 +60,7 @@ public class Main {
      *
      * dp[i][j] = max{ dp[i-1][j], dp[i-1][j-v[i][k]]+w[i][k], k is each group's item index }
      * But when implement using 2D array, dp[i-1][j] needs to move out to 2nd loop instead of in most inner loop
-     * e.g. the answer should be max { a, b, c, d }, if we move into most inner loop, answser will be max { a, c } only
+     * e.g. the answer should be max { a, b, c, d }, if we move into most inner loop, answser will be max { a, d } only
      * which is wrong; we need to compute it as max { max { max { a b }, c }, d }}}
      *
      * Sounds conter-intuitive, why it is different from 01 knapsack? Well in 01 knapsack we just need to compute
