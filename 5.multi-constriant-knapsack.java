@@ -58,8 +58,8 @@ public class Main {
      * Just add a new dimension for dp status and transition loop
      * for 1D rolling array, just need to update backwards for all dimensions
      *
-     * The question can change to 01-knapsack problem but only not exceed M number of items
-     * that can also solved by adding number of items as additional dimension
+     * The question can change to 01-knapsack problem but also not exceed total M number of items
+     * that can also be solved by adding M as additional dimension and the second loop will count from M to 1
      */
     static int knapsack() {
         int[][] dp = new int[V+1][C+1];
