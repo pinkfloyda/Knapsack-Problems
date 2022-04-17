@@ -1,57 +1,104 @@
+/* Group-Knapsack Problem
+ *
+ * Given a knapsack with volumn V and N groups of items where each group has n[i] items, 
+ * each item has volumn v[i], weight w[i], at most one item can be picked from each group,
+ * what's the max total weight by putting items into knapsack without exceeding its volumn.
+ * 
+ * Input:
+ * First line has two integers: N and V, seperated by space
+ * Then followed by N groups of lines, for each group:
+ *   The first line has one integer: n, the number of items in this group
+ *   Each of next n lines has two integers: each item's volumn and weight, sperated by space
+ * 
+ * Output:
+ * One line with one integer: max total item weight
+ *
+ * Sample Input:
+ *   3 5
+ *   2
+ *   1 2
+ *   2 4
+ *   1
+ *   3 4
+ *   1
+ *   4 5
+ * Sample Output:
+ *   8
+ */
+
 import java.util.*;
-import java.io.*;
-
-/*
-Input format:
-
-First line is two integers N and C, representing unique item group count and knapsack capacity, seperated by space
-Then followed by lines reprenting group and item info:
-   First line is group's item number M, then each of following M lines is two integers si and vi, reprenting each item's size and value
-
-Output format:
-One line of one integer, which is the final result: the possible max value
-*/
 
 public class Main {
+    
+    static int N;
+    static int V;
+    static List<List<Integer>> v = new ArrayList<>();
+    static List<List<Integer>> w = new ArrayList<>();
 
-    public static void main(String[] args) throws Exception {
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
 
-        // Read N and C
-        String[] s = in.readLine().split(" ");
-        int N = Integer.parseInt(s[0]); // unique group count
-        int C = Integer.parseInt(s[1]); // knapsack capacity
+        N = sc.nextInt();
+        V = sc.nextInt();
 
-        List<List<Integer>> ss = new ArrayList<>(); // size array for each item
-        List<List<Integer>> vs = new ArrayList<>(); // value array for each item
-
-        // Read size and value for each item
-        for (int i=0; i<N; i++) {
-            ss.add(new ArrayList<>());
-            vs.add(new ArrayList<>());
-            int m = Integer.parseInt(in.readLine());
-            for (int j=0; j<m; j++) {
-                s = in.readLine().split(" ");
-                ss.get(i).add(Integer.parseInt(s[0]));
-                vs.get(i).add(Integer.parseInt(s[1]));
+        for(int i=0; i<N; i++) {
+            int n = sc.nextInt();
+            v.add(new ArrayList<>());
+            w.add(new ArrayList<>());
+            for(int j=0; j<n; j++) {
+                v.get(i).add(sc.nextInt());
+                w.get(i).add(sc.nextInt());
             }
         }
-
-        // Output result
-        System.out.println(knapsackDP(N, C, ss, vs));
+        
+        int res = knapsack1D();
+        
+        System.out.println(res);
     }
-
-    private static int knapsackDP(int N, int C, List<List<Integer>> ss, List<List<Integer>> vs) {
-        int[] dp = new int[C+1];
-        for (int i=0; i<N; i++) {
-            for (int j=C; j>=1; j--) {
-                for (int k=0; k<ss.get(i).size(); k++) {
-                    if (j>=ss.get(i).get(k)) {
-                         dp[j] = Math.max(dp[j], dp[j-ss.get(i).get(k)]+vs.get(i).get(k));
+ 
+    /* 1) Standard DP
+     *
+     * dp[i][j] = max{ dp[i-1][j], dp[i-1][j-v[i][k]]+w[i][k], k is each group's item index }
+     * But when implement using 2D array, dp[i-1][j] needs to move out to 2nd loop instead of in most inner loop
+     * e.g. the answer should be max { a, b, c, d }, if we move into most inner loop, answser will be max { a, c } only
+     * which is wrong; we need to compute it as max { max { max { a b }, c }, d }}}
+     *
+     * Sounds conter-intuitive, why it is different from 01 knapsack? Well in 01 knapsack we just need to compute
+     * max { a, b }. Actually this tricky case will happens for any problem with max { a, b, ... }
+     */
+    static int knapsack() {
+        int[][] dp = new int[N+1][V+1];
+        for(int i=1; i<=N; i++) {
+            for(int j=1; j<=V; j++) {
+                dp[i][j] = dp[i-1][j];
+                for(int k=1; k<=v.get(i-1).size(); k++) {
+                    if(j>=v.get(i-1).get(k-1)) {
+                        dp[i][j] = Math.max(dp[i][j], dp[i-1][j-v.get(i-1).get(k-1)]+w.get(i-1).get(k-1));
                     }
                 }
             }
         }
-        return dp[C];
+        return dp[N][V];
+    }
+    
+    /* 2) Standard DP using 1D rolling array
+     *
+     * Noted that in rolling array, we need to count V towards 1, not like 01 knapsack
+     * And we cannot swap the loop order by looping group items first then loop through volumn
+     * that is wrong in logic, which means 01 Knapsack problem given all items from all groups
+     * instead of picking at most one item per group.
+     */
+    static int knapsack1D() {
+        int[] dp = new int[V+1];
+        for (int i=0; i<N; i++) {
+            for (int j=V; j>=1; j--) {
+                for (int k=0; k<v.get(i).size(); k++) {
+                    if (j>=v.get(i).get(k)) {
+                         dp[j] = Math.max(dp[j], dp[j-v.get(i).get(k)]+w.get(i).get(k));
+                    }
+                }
+            }
+        }
+        return dp[V];
     }
 }
