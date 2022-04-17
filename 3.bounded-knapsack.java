@@ -76,12 +76,11 @@ public class Main {
      *
      * s[i] can be represented by adding all numbers 1,2,2^2,...2^(k-1),s[i]-2^k+1, which is the max possible number
      * And using 1,2,4....2^(k-1) can represent any number from 1 to 2^k-1, can we represent any number between
-     * 2^k-1 and s[i]? Yes, number between 2^k-1 and s[i] can be represented by s[i]-M, where M can be as large as
-     * s[i]-2^k which is smaller than 2^k-1 (if not, then s[i] >= 2^(k+1)-1, which is wrong), noted s[i] is total sum
-     * so number between 2^k-1 and s[i] is just the sum of (allItems - itemsCanSumToM)
-     * 
-     *  1              2^k-1   s[i]     2^(k+1)-1
-     *  A----------------B-------C----------D
+     * 2^k and s[i]? Yes, number between 2^k and s[i] can be represented by s[i]-M, where M can be as large as
+     * s[i]-2^k which is smaller or equal to 2^k-1 (if not, then  2^(k+1)-1 < s[i], which is wrong as k is largest 
+     * value to make 2^k-1 < s[i]), noted s[i] is total sum, so number between 2^k and s[i] is the sum(allItems - itemsCanSumEqM)
+     *   1              2^k-1   s[i]     2^(k+1)-1
+     *   A----------------B-------C----------D
      */
     static int knapsackBinary() {
         int[] dp = new int[V+1];
