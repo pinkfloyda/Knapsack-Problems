@@ -56,7 +56,7 @@ public class Main {
  
     /* 1) Standard DP
      *
-     * dp[i][j] = max{ dp[i-1][j-k*v[i]]+k*w[i], 0<=k<=n[i] && k*v[i]<=j }
+     * Just combine solutions based on which kind of item
      */
     static int knapsack() {
         int[] dp = new int[V+1];
