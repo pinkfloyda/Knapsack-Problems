@@ -2,8 +2,8 @@
  *
  * Given a knapsack with volumn V and N items where each item has volumn v[i] and weight w[i],
  * each item can only be picked once, putting items (in increasing order) into knapsack to get max 
- * total weight and without exceeding its volumn. Return the smallest lexical solution.
- * e.g. both "2 3" and "1 4" are the optimal solutin, return "1 4" as it is lexically smaller.
+ * total weight and without exceeding its volumn. Return the smallest number-lexical solution.
+ * e.g. both "10 11" and "2 3" are the optimal solutin, return "2 3" as it is number-lexically smaller (2 < 10).
  * 
  * Input:
  * First line has two integers: N and V, seperated by space
