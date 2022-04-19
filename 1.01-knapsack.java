@@ -145,7 +145,8 @@ public class Main {
     /* 5) Standard DP using rolling 1D array but happen to meet budget (no more no less)
      *
      * What is max value by picking item but happen to meet budget, return -1 if not possible
-     * Similar solution like above but initially dp[0] should be 0 and dp[1..C] should all be -1. 
+     * Now dp[i][j] stands for max value of picking from first i items with cost happen to be j
+     * Initially dp[0] should be 0 and dp[1..C] should all be -1. 
      * It means initially for zero items we can meet budget of 0 without picking anything and max value is 0;
      * not possible for other non-zero budget as we have nothing to pick from.
      *
