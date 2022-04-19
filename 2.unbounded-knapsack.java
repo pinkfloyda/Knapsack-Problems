@@ -13,8 +13,8 @@
  * One line with one integer: max value
  *
  * Data range:
- * 0<N,C≤1000
- * 0<ci,vi≤1000
+ * 0 < N,C ≤ 1000
+ * 0 < ci,vi ≤ 1000
  *
  * Sample Input:
  *   4 5
