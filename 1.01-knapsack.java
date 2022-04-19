@@ -1,7 +1,7 @@
 /* 01-Knapsack Problem
  *
  * You have a knapsack with budget C and N items can be picked into knapsack,
- * each (i-th) item has cost ci and value vi and each item can only be picked once.
+ * each (i-th) item has cost ci, value vi and can only be picked once.
  * What is the max value you can get without exceeding budget?
  * 
  * Input:
