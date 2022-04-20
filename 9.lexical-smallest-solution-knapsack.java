@@ -1,16 +1,24 @@
 /* Lexical-Smallest-Solution-Knapsack Problem
  *
- * Given a knapsack with volumn V and N items where each item has volumn v[i] and weight w[i],
- * each item can only be picked once, putting items (in increasing order) into knapsack to get max 
- * total weight and without exceeding its volumn. Return the smallest number-lexical solution.
- * e.g. both "10 11" and "2 3" are the optimal solutin, return "2 3" as it is number-lexically smaller (2 < 10).
+ * You have a knapsack with budget C and N items can be picked into knapsack,
+ * each (i-th) item has cost ci, value vi and can only be picked once.
+ * There can be many optimal picking solutions that can get max value 
+ * without exceeding budget, let solution be a picking sequence of item indices sorted incrementally.
+ * What is the lexical smallest solution?
+ * 
+ * e.g. both "10 11" and "2 3" are the optimal solutions, return "2 3" as it is lexical smaller (2 < 10).
  * 
  * Input:
- * First line has two integers: N and V, seperated by space
- * Each of next N lines has two integers: each item's volumn and weight, sperated by space
+ * First line has two integers: N and C, seperated by space
+ * Then followed by next N lines representing items:
+ *   each line has two integers: item's cost and value, sperated by space
  * 
  * Output:
- * One line with integers: item number in increasing order, sperated by space
+ * One line with multiple integers: the picking sequence sorted incrementally by item index
+ *
+ * Data range:
+ * 0 < N,C ≤ 1000
+ * 0 < ci,vi ≤ 1000
  *
  * Sample Input:
  *   4 5
@@ -27,21 +35,22 @@ import java.util.*;
 public class Main {
     
     static int N;
-    static int V;
+    static int C;
+    static int[] c;
     static int[] v;
-    static int[] w;
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
         N = sc.nextInt();
-        V = sc.nextInt();
+        C = sc.nextInt();
+        
+        c = new int[N];
         v = new int[N];
-        w = new int[N];
 
         for(int i=0; i<N; i++) {
+            c[i] = sc.nextInt();
             v[i] = sc.nextInt();
-            w[i] = sc.nextInt();
         }
         
         List<Integer> res = knapsack();
@@ -53,35 +62,33 @@ public class Main {
     
     /* For each status, log pick or not pick current item.
      *
-     * But when tracing a solution in dp, it is starting from N,V and go backwards, so we need to relabel
-     * the items, e.g. first iteration is actually for last item, ith item is actually for N-i+1 item
-     * In this way, the final dp from N,V will pick items in increasing order.
+     * But when tracing a solution in dp, it is starting from N,C and go backwards, so we need to relabel
+     * the items: first iteration is actually for last item, ith item is actually for N-i+1 item
+     * In this way, going backwards from N,C will pick items in increasing order.
      *
-     * And when we pick items in increasing order, if possible we need to pick current lower indexed item 
-     * to ensure we end up with a smallest lexical solution.
-     * 
-     * To ensure we always pick current lower indexed item, in the dp transition, we need to log pick status
-     * when dp[j] <= dp[j-v[k-1]]+w[k-1]
+     * And when we pick items in increasing order, if we have choices, we need to pick current lower indexed item 
+     * to ensure we end up with a smallest lexical solution. In that way, when update the dp transition, whenever
+     * dp[j] == dp[j-c[k-1]]+v[k-1], we always choose to pick current item.
      */ 
     static List<Integer> knapsack() {
-        int[] dp = new int[V+1];
-        boolean[][] pick = new boolean[N+1][V+1];
+        int[] dp = new int[C+1];
+        boolean[][] pick = new boolean[N+1][C+1];
         
         for(int i=1; i<=N; i++) {
             int k = N-i+1; // re-labeling of items
-            for(int j=V; j>=v[k-1]; j--) {
-                if(dp[j] <= dp[j-v[k-1]]+w[k-1]) {
+            for(int j=C; j>=c[k-1]; j--) {
+                if(dp[j] <= dp[j-c[k-1]]+v[k-1]) {
                     pick[i][j] = true;
                 }
-                dp[j] = Math.max(dp[j], dp[j-v[k-1]]+w[k-1]);
+                dp[j] = Math.max(dp[j], dp[j-c[k-1]]+v[k-1]);
             }
         }
         
         List<Integer> res = new ArrayList<>();
-        for(int i=N, j=V; i>=1; i--) {
+        for(int i=N, j=C; i>=1; i--) {
             if(pick[i][j]) {
                 res.add(N-i+1);
-                j -= v[N-i];
+                j -= c[N-i];
             }
         }
         
