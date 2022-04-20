@@ -87,10 +87,21 @@ public class Main {
      * 
      * So the dp status can be dp[i][j]: the max value of choosing items starting 
      * from i-th item without exceeding cost j. Noted that this dp array is a rolling array 
-     * updated recursivly using group-knapsack algorithm
+     * updated recursivly using group-knapsack algorithm, if not use rolling array, dp status should be
+     * dp[i][j][k]: the max value of using ith item as root, choosing
+     * first j groups without excceeding cost k. Noted for not every tree will have the same number of
+     * children, so the above dp array is quite hard to create and maintain. Probably need to create a
+     * temp 2D array for each recurision and assign values back to global dp[i][j]. Here shows
+     * the powerfulness and expressiveness of using a rolling array.
      *
      * As child may also have its children and so on, we need to go down the tree recursively and 
-     * update the dp table recursively. 
+     * update the dp table recursively. e.g item A got B C D as children, B got E F G as children, so in
+     * order to apply group knapsack algorithm to A's children, need to apply group knapsack algorithm to B's
+     * children first, then B will have the max values for all costs from 1 to C (or more precisely C-c[A]), which
+     * unblocks the group knapsack process for A's children.
+     *
+     * The algorithm also applied to mulitple trees, first do a group knapsack algorithm for all the roots as groups
+     * then recursively go down from each root to build the global dp table.
      */
     static void knapsack(int root) {
         for(int j=c[root]; j<=C; j++) {
