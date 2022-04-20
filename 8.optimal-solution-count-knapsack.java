@@ -1,15 +1,20 @@
 /* Optimal-Solution-Count-Knapsack Problem
  *
- * Given a knapsack with volumn V and N items where each item has volumn v[i] and weight w[i],
- * each item can only be picked once, can get max total weight by putting items into 
- * knapsack without exceeding its volumn, compute how many optimal solutions.
+ * You have a knapsack with budget C and N items can be picked into knapsack,
+ * each (i-th) item has cost ci, value vi and can only be picked once.
+ * How many optimal picking solutions that can get max value without exceeding budget?
  * 
  * Input:
- * First line has two integers: N and V, seperated by space
- * Each of next N lines has two integers: each item's volumn and weight, sperated by space
+ * First line has two integers: N and C, seperated by space
+ * Then followed by next N lines representing items:
+ *   each line has two integers: item's cost and value, sperated by space
  * 
  * Output:
- * One line with one integer: max total item weight, return number % (10^9 + 7)
+ * One line with one integer: number of optimal solutions % 1000000007
+ *
+ * Data range:
+ * 0 < N,C ≤ 1000
+ * 0 < ci,vi ≤ 1000
  *
  * Sample Input:
  *   4 5
@@ -27,21 +32,22 @@ public class Main {
     static int M = 1000000007;
     
     static int N;
-    static int V;
+    static int C;
+    static int[] c;
     static int[] v;
-    static int[] w;
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
         N = sc.nextInt();
-        V = sc.nextInt();
+        C = sc.nextInt();
+        
+        c = new int[N];
         v = new int[N];
-        w = new int[N];
 
         for(int i=0; i<N; i++) {
+            c[i] = sc.nextInt();
             v[i] = sc.nextInt();
-            w[i] = sc.nextInt();
         }
         
         int res = knapsack();
@@ -50,25 +56,25 @@ public class Main {
     }
     
     static int knapsack() {
-        int[][] dp = new int[V+1][2]; // [0] means optimal weight, [1] means solution count
+        int[][] dp = new int[C+1][2]; // [0] means max value, [1] means solution count
         
-        for(int i=0; i<=V; i++) {
+        for(int i=0; i<=C; i++) {
             dp[i][1] = 1; // initially, for knapsack with 0 volumn, the only optimal solution is don't put any
         }
         
         for(int i=1; i<=N; i++) {
-            for(int j=V; j>=v[i-1]; j--) {
-                if(dp[j][0] == dp[j-v[i-1]][0] + w[i-1]) {
-                    dp[j][1] = (dp[j][1] + dp[j-v[i-1]][1]) % M;
-                } else if(dp[j][0] < dp[j-v[i-1]][0] + w[i-1]) {
-                    dp[j][0] = dp[j-v[i-1]][0] + w[i-1];
-                    dp[j][1] = dp[j-v[i-1]][1];
+            for(int j=C; j>=c[i-1]; j--) {
+                if(dp[j][0] == dp[j-c[i-1]][0] + v[i-1]) {
+                    dp[j][1] = (dp[j][1] + dp[j-c[i-1]][1]) % M;
+                } else if(dp[j][0] < dp[j-c[i-1]][0] + v[i-1]) {
+                    dp[j][0] = dp[j-c[i-1]][0] + v[i-1];
+                    dp[j][1] = dp[j-c[i-1]][1];
                 }
-                // if dp[j][0] > dp[j-v[i-1]][0] + w[i-1], don't need to do anything
+                // if dp[j][0] > dp[j-c[i-1]][0] + v[i-1], don't need to do anything
                 // as dp[j][*] just inherit the previous value
             }
         }
         
-        return dp[V][1];
+        return dp[C][1];
     }
 }
