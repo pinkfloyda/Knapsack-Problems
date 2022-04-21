@@ -109,4 +109,69 @@ public class Main {
         }
         return dp[C];
     }
+    
+    /* 3) Optimized DP using sliding window with monotone deque, time O(NC), space O(C)
+     *
+     * Consider 1D rolling array state transition
+     * dp[j] = max{                                             dp[j-mc]+mv, dp[j-(m-1)c]+(m-1)v, ..., dp[j-2c]+2v, dp[j-c]+v, dp[j] }
+     * dp[j-c]+v = max{                    dp[j-(m+1)c]+(m+1)v, dp[j-mc]+mv, dp[j-(m-1)c]+(m-1)v, ..., dp[j-2c]+2v, dp[j-c]+v }
+     * dp[j-2c]+2v = max{ dp[j-(m+2)c]+mv, dp[j-(m+1)c]+(m+1)v, dp[j-mc]+mv, dp[j-(m-1)c]+(m-1)v, ..., dp[j-2c]+2v }
+     * ...
+     * 
+     * So it is observed that it looks like a sliding window with max length of n[i], if we update 1D rolling array from right to left, the sliding window
+     * will slide from right to left. If sliding window is full, each slide will cause new item in front added and last item in back dropped 
+     * Now this problem is to find sliding window max value, which can be solved using a monotone deque where the front the deque always the largest
+     * When add item to the deque, first remove any smaller items from last, then add to the last
+     * When remove item from the deque, check if item is same value of deque's first, if so, remove the first item
+     * In this way, the deque always contains items starting from largest
+     *
+     * And each sliding window will cover the sequence j, j-c, j-2c, .... max(j-mc, 0), we need to do this starting with all
+     * [j, j-c), so it can cover sequence j+1, j+1-c, ...; j+2, j+2-c, ....;
+     */
+    static int knapsackOptimize() {
+        int[] dp = new int[C+1];
+        for(int i=1; i<=N; i++) {
+            for(int j=C; j>C-c[i-1] && j>0; j--) {
+                Deque<Integer> q = new LinkedList<>();
+                int hi = 0;
+                int lo = 0;
+                while(j-hi*c[i-1] >= 0) {
+                    if(hi-lo<n[i-1]) {
+                        enqueue(q, dp[j-hi*c[i-1]]+hi*v[i-1]);
+                        hi++;
+                    } else {
+                        enqueue(q, dp[j-hi*c[i-1]]+hi*v[i-1]);
+                        int max = q.peekFirst() - lo*v[i-1];
+                        dequeue(q, dp[j-lo*c[i-1]]+lo*v[i-1]);
+                        dp[j-lo*c[i-1]] = max;
+                        lo++;
+                        hi++;
+                    }
+                }
+                while(!q.isEmpty()) {
+                    int max = q.peekFirst() - lo*v[i-1];
+                    dequeue(q, dp[j-lo*c[i-1]]+lo*v[i-1]);
+                    dp[j-lo*c[i-1]] = max;
+                    lo++;
+                }
+            }
+        }
+        return dp[C];
+    }
+    
+    static void enqueue(Deque<Integer> q, int v) {
+        while(!q.isEmpty()) {
+            if(q.peekLast() >= v) {
+                break;
+            }
+            q.pollLast();
+        }
+        q.offerLast(v);
+    }
+    
+    static void dequeue(Deque<Integer> q, int v) {
+        if(!q.isEmpty() && q.peekFirst() == v) {
+            q.pollFirst();
+        }
+    }
 }
